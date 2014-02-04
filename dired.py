@@ -391,15 +391,14 @@ class DiredMoveCommand(TextCommand, DiredBaseCommand):
         if kwargs and kwargs["to"]:
             self.move_to_extreme(kwargs["to"])
             return
+        elif kwargs and kwargs["duplicate"]:
+            self._move(self.path, duplicate=kwargs["duplicate"])
         else:
             files = self.get_marked() or self.get_selected()
             if files:
                 prompt.start('Move to:', self.view.window(), self.path, self._move)
 
-    def _move(self, path):
-        if path == self.path:
-            return
-
+    def _move(self, path, duplicate=False):
         files = self.get_marked() or self.get_selected()
 
         if not isabs(path):
@@ -414,8 +413,19 @@ class DiredMoveCommand(TextCommand, DiredBaseCommand):
         path = normpath(normcase(path))
         for filename in files:
             fqn = normpath(normcase(join(self.path, filename)))
-            if fqn != path:
+            if fqn != path and not duplicate:
                 shutil.move(fqn, path)
+            else:
+                import itertools
+                for i in itertools.count(2, 1):
+                    if os.path.isfile(str(os.path.splitext(fqn)[0])+' '+str(i)):
+                        pass
+                    else:
+                        break
+                if isdir(fqn):
+                    shutil.copytree(fqn, "{1} {0}{2}".format(i, *os.path.splitext(fqn)))
+                else:
+                    shutil.copy2(fqn, "{1} {0}{2}".format(i, *os.path.splitext(fqn)))
         self.view.run_command('dired_refresh')
 
 

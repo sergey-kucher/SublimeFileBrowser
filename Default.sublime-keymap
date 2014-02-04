@@ -235,6 +235,16 @@
         { "key": "setting.dired_rename_mode", "operand": false }
     ]
   },
+  {
+    "keys": ["n"],
+    "command": "dired_move",
+    "args":{"duplicate": true, "to": false},
+    "context": [
+        { "key": "selector", "operator": "equal", "operand": "text.dired" },
+        { "key": "setting.dired_rename_mode", "operand": false }
+    ]
+  },
+
 // custom movement in buffer
   {
       "keys": ["super+up"],
