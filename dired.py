@@ -417,15 +417,27 @@ class DiredMoveCommand(TextCommand, DiredBaseCommand):
                 shutil.move(fqn, path)
             else:
                 import itertools
-                for i in itertools.count(2, 1):
-                    if os.path.isfile(str(os.path.splitext(fqn)[0])+' '+str(i)):
+                for i in itertools.count(2):
+                    cfp = "{1} {0}{2}".format(i, *os.path.splitext(fqn))
+                    if os.path.isfile(cfp) or os.path.isdir(cfp):
                         pass
                     else:
                         break
-                if isdir(fqn):
-                    shutil.copytree(fqn, "{1} {0}{2}".format(i, *os.path.splitext(fqn)))
+                if duplicate == 'rename':
+                    print(fqn)
+                    print(cfp)
+                    prompt.start('New name:', self.view.window(), "{1} {0}{2}".format(i, *os.path.splitext(filename)), self._duplicate, rename=(fqn, cfp))
                 else:
-                    shutil.copy2(fqn, "{1} {0}{2}".format(i, *os.path.splitext(fqn)))
+                    self._duplicate(fqn, cfp)
+        self.view.run_command('dired_refresh')
+
+    def _duplicate(self, *args):
+        print(args)
+        fqn, new_file = args
+        if isdir(fqn):
+            shutil.copytree(fqn, new_file)
+        else:
+            shutil.copy2(fqn, new_file)
         self.view.run_command('dired_refresh')
 
 
